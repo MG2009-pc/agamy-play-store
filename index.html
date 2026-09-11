@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agamy Softwares Installer</title>
+    
+        <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000f1">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <!-- استدعاء خط Cairo والأيقونات -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #060606;
+            color: #e0e0e0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* ----- الخلفية الخضراء المتحركة ----- */
+        .bg-animated {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 15% 15%, rgba(1, 135, 95, 0.18) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(0, 230, 118, 0.12) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.06) 0%, transparent 60%);
+            filter: blur(50px);
+            animation: moveGreenGlow 14s ease-in-out infinite alternate;
+        }
+
+        @keyframes moveGreenGlow {
+            0% { transform: scale(1) translate(0, 0); }
+            50% { transform: scale(1.15) translate(-25px, 35px); }
+            100% { transform: scale(1) translate(25px, -25px); }
+        }
+
+        /* ----- الشريط العلوي (Header) ----- */
+        header {
+            background: rgba(12, 12, 12, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 15px 5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(0, 230, 118, 0.12);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .main-header-title {
+            font-size: 19px;
+            color: #ffffff;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .main-header-title span {
+            color: #00e676;
+            text-shadow: 0 0 10px rgba(0, 230, 118, 0.4);
+        }
+
+        .btn-back-main {
+            display: none;
+            background: rgba(255, 255, 255, 0.08);
+            color: #00e676;
+            border: 1px solid rgba(0, 230, 118, 0.3);
+            padding: 6px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back-main:hover {
+            background: #00e676;
+            color: #000;
+        }
+
+        /* ----- Container والمحتوى ----- */
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 12px;
+        }
+
+        /* ----- الواجهة الأولى: شبكة التطبيقات (Home View) ----- */
+        #homeView {
+            transition: opacity 0.4s ease;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title i {
+            color: #00e676;
+        }
+
+        /* شبكة مربعات التطبيقات (2 في السطر للموبايل) */
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        @media (min-width: 768px) {
+            .apps-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 20px;
+            }
+        }
+
+        .app-card {
+            background: rgba(18, 18, 18, 0.75);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .app-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(0, 230, 118, 0.4);
+            box-shadow: 0 10px 25px rgba(0, 230, 118, 0.15);
+        }
+
+        .app-card:active {
+            transform: scale(0.96);
+        }
+
+        .app-card-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+            object-fit: cover;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .app-card-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.3;
+            height: 36px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .app-card-category {
+            font-size: 11px;
+            color: #00e676;
+            margin-bottom: 6px;
+        }
+
+        .app-card-rating {
+            font-size: 11px;
+            color: #ffca28;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        /* ----- الواجهة الثانية: صفحة تفاصيل التطبيق (App Detail View) ----- */
+        #detailView {
+            display: none;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #detailView.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* الهيدر العلوي للتطبيق */
+        .detail-header {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 20px;
+            background: rgba(18, 18, 18, 0.6);
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .detail-icon {
+            width: 85px;
+            height: 85px;
+            border-radius: 20px;
+            object-fit: cover;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .detail-info {
+            flex: 1;
+        }
+
+        .detail-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .detail-category {
+            font-size: 13px;
+            color: #00e676;
+            margin-bottom: 8px;
+        }
+
+        /* زر التثبيت الكبيـر (Google Play Style) */
+        .btn-install-large {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            background: linear-gradient(135deg, #01875f 0%, #00e676 100%);
+            color: #000;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-install-large:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 22px rgba(0, 230, 118, 0.5);
+        }
+
+        /* معرض صور التطبيق من الداخل (Screenshots Slider) */
+        .screenshots-section {
+            margin: 25px 0;
+        }
+
+        .section-label {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .screenshots-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            scroll-snap-type: x mandatory;
+        }
+
+        /* تخصيص السكرول بار للموبيل والكمبيوتر */
+        .screenshots-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+        .screenshots-scroll::-webkit-scrollbar-thumb {
+            background: rgba(0, 230, 118, 0.3);
+            border-radius: 10px;
+        }
+
+        .screenshot-img {
+            width: 180px;
+            height: 320px;
+            object-fit: cover;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            scroll-snap-align: start;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .screenshot-img:hover {
+            transform: scale(1.02);
+        }
+
+        /* قسم شرح طريقة التثبيت */
+        .guide-box {
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid rgba(0, 230, 118, 0.25);
+            border-radius: 14px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .guide-box p {
+            font-size: 14px;
+            line-height: 1.8;
+            color: #dddddd;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-animated"></div>
+
+    <!-- الشريط العلوي -->
+    <header>
+        <div class="main-header-title">
+            <i class="fa-solid fa-layer-group" style="color: #00e676;"></i>
+           Play Store <span> Agamy</span>
+        </div>
+        <button class="btn-back-main" id="btnBack" onclick="showHome()">
+            <i class="fa-solid fa-arrow-right"></i> الرجوع للمتجر
+        </button>
+    </header>
+    <br><br>
+<center><img src="icon.png" alt="Agamy Play Store" style="width: 200px; height: 200px; border-radius: 30px;"></center>
+    <div class="container">
+
+        <!-- الواجهة الأولى: قائمة التطبيقات على شكل مربعات -->
+        <div id="homeView">
+            <div class="section-title">
+                <i class="fa-solid fa-border-all"></i>
+                التطبيقات والمواقع المتاحة
+            </div>
+            <div class="apps-grid" id="appsGrid">
+                <!-- التطبيقات تظهر هنا -->
+            </div>
+        </div>
+
+        <!-- الواجهة الثانية: صفحة عرض التطبيق بالداخل -->
+        <div id="detailView">
+            <!-- التفاصيل يتم بناؤها ديناميكياً بواسطة Javascript -->
+        </div>
+
+    </div>
+
+    <script>
+        // قاعدة بيانات البرامج المتاحة بداخل متجرك
+        const myApps = [
+            {
+                id: 1,
+                name: "Agamy Tab App",
+                category: "النظام الأساسي",
+                rating: 4.8,
+                icon: "aga.png",
+                link: "https://mg2009-pc.github.io/agamy-tab/",
+                guide: "1.اضغط على الثلاث نقاط اعلي اليمين في كروم وبعد ذللك اضغط علي تثبيت الموقع كتطبيق وانتظر التثبيت.\n2. سيعمل الموقع مباشرة دون الحاجة لأي تحميل.",
+                screenshots: [
+                    "ش.png",
+                    "ش3.png",
+                    "ش2.png"
+                ]
+            },
+            {
+                id: 2,
+                name: "AAgamy Office",
+                category: "أدوات مكتبية",
+                rating: 4.5,
+                icon: "off.png",
+                link: "https://mg2009-pc.github.io/AAgamy-Office/",
+              guide: "1.اضغط على الثلاث نقاط اعلي اليمين في كروم وبعد ذللك اضغط علي تثبيت الموقع كتطبيق وانتظر التثبيت.\n2. سيعمل الموقع مباشرة دون الحاجة لأي تحميل.",
+                screenshots: [
+                    "1.png",
+                    "2.png",
+                    "3.png"
+                ]
+            },
+            {
+                id: 3,
+                name: "Agamydos",
+                category: "نظام تشغيل للكمبيوتر",
+                rating: 5.0,
+                icon: "ag.png",
+                link: "https://mg2009-pc.github.io/AGAMYDOSE/",
+                guide: "1. انقر على زر التثبيت.\n2. يمكن تثبيته كنظام تشغيل للكمبيوتر\n3. يعمل مباشرتا عن طريق المتصفح",
+                screenshots: [
+                    "4.png",
+                    "5.png",
+                    "6.png"
+                        
+                ]
+            },
+            {
+                id: 4,
+                name: "Agamy Invenders",
+                category: "ألعاب",
+                rating: 4.2,
+                icon: "inv.png",
+                link: "https://mg2009-pc.github.io/Agamy-Invenders/",
+              guide: "1.اضغط على الثلاث نقاط اعلي اليمين في كروم وبعد ذللك اضغط علي تثبيت الموقع كتطبيق وانتظر التثبيت.\n2. سيعمل الموقع مباشرة دون الحاجة لأي تحميل.",
+                screenshots: [
+                    "7.png",
+                    
+                ]
+            },
+              {
+                id: 5,
+                name: "Agamy Cars",
+                category: "ألعاب",
+                rating: 4.2,
+                icon: "car.png",
+                link: "https://mg2009-pc.github.io/Agamy-city-car/",
+              guide: "1.اضغط على الثلاث نقاط اعلي اليمين في كروم وبعد ذللك اضغط علي تثبيت الموقع كتطبيق وانتظر التثبيت.\n2. سيعمل الموقع مباشرة دون الحاجة لأي تحميل.",
+                screenshots: [
+                    "8.png",
+                    "9.png"
+               
+                ]
+            }, 
+                   {
+                id: 6,
+                name: "Agamy Snakes",
+                category: "العاب",
+                rating: 4.2,
+                icon: "66.png",
+                link: "https://mg2009-pc.github.io/AGAMY-SNACKES/",
+              guide: "1.اضغط على الثلاث نقاط اعلي اليمين في كروم وبعد ذللك اضغط علي تثبيت الموقع كتطبيق وانتظر التثبيت.\n2. سيعمل الموقع مباشرة دون الحاجة لأي تحميل.",
+                screenshots: [
+                    "13.png",
+                ]
+            },
+                   {
+                id: 7,
+                name: "Yalla Nekhtem",
+                category: "قرءان كريم",
+                rating: 4.2,
+                icon: "kk.png",
+                link: "https://mg2009-pc.github.io/Samaely/",
+              guide: "1.اضغط على الثلاث نقاط اعلي اليمين في كروم وبعد ذللك اضغط علي تثبيت الموقع كتطبيق وانتظر التثبيت.\n2. سيعمل الموقع مباشرة دون الحاجة لأي تحميل.",
+                screenshots: [
+                    "10.png",
+                    "11.png",
+                    "12.png"
+               
+                ]
+            }
+            ,
+                   {
+                id: 8,
+                name: "Agamy.Dev",
+                category: "بطاقه التعريف الشخصيه",
+                rating: 4.2,
+                icon: "rr.png",
+                link: "https://mg2009-pc.github.io/agamy-dev/",
+              guide: "1.اضغط على الثلاث نقاط اعلي اليمين في كروم وبعد ذللك اضغط علي تثبيت الموقع كتطبيق وانتظر التثبيت.\n2. سيعمل الموقع مباشرة دون الحاجة لأي تحميل.",
+                screenshots: [
+                    "14.png",
+                    "15.png"
+                 
+               
+                ]
+            }
+        ];
+
+        // عرض النجوم
+        function generateStars(rating) {
+            let starsHTML = '';
+            const fullStars = Math.floor(rating);
+            for (let i = 0; i < fullStars; i++) starsHTML += `<i class="fa-solid fa-star"></i>`;
+            if (rating % 1 >= 0.5) starsHTML += `<i class="fa-solid fa-star-half-stroke"></i>`;
+            return `${starsHTML} <span>(${rating})</span>`;
+        }
+
+        // عرض القائمة الرئيسية (الواجهة الأولى)
+        function renderHome() {
+            const grid = document.getElementById('appsGrid');
+            grid.innerHTML = '';
+
+            myApps.forEach(app => {
+                const card = document.createElement('div');
+                card.className = 'app-card';
+                card.onclick = () => openAppDetail(app.id);
+
+                card.innerHTML = `
+                    <img src="${app.icon}" class="app-card-icon" alt="${app.name}">
+                    <div class="app-card-name">${app.name}</div>
+                    <div class="app-card-category">${app.category}</div>
+                    <div class="app-card-rating">${generateStars(app.rating)}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // فتح واجهة تفاصيل التطبيق بدلاً من نقله فوراً
+        function openAppDetail(appId) {
+            const app = myApps.find(a => a.id === appId);
+            if (!app) return;
+
+            const detailView = document.getElementById('detailView');
+            const homeView = document.getElementById('homeView');
+            const btnBack = document.getElementById('btnBack');
+
+            // إعداد صور المعرض
+            let screenshotsHTML = '';
+            app.screenshots.forEach(imgUrl => {
+                screenshotsHTML += `<img src="${imgUrl}" class="screenshot-img" alt="لقطة من التطبيق">`;
+            });
+
+            // بناء واجهة التطبيق
+            detailView.innerHTML = `
+                <div class="detail-header">
+                    <img src="${app.icon}" class="detail-icon" alt="${app.name}">
+                    <div class="detail-info">
+                        <div class="detail-title">${app.name}</div>
+                        <div class="detail-category">${app.category}</div>
+                        <div class="app-card-rating">${generateStars(app.rating)}</div>
+                    </div>
+                </div>
+
+                <a href="${app.link}" target="_blank" class="btn-install-large">
+                    <i class="fa-solid fa-download"></i> تثبيت الآن
+                </a>
+
+                <!-- صور من داخل التطبيق -->
+                <div class="screenshots-section">
+                    <div class="section-label">
+                        <i class="fa-solid fa-images" style="color: #00e676;"></i>
+                        صور من داخل التطبيق
+                    </div>
+                    <div class="screenshots-scroll">
+                        ${screenshotsHTML}
+                    </div>
+                </div>
+
+                <!-- شرح طريقه التثبيت -->
+                <div class="guide-box">
+                    <div class="section-label" style="margin-bottom: 8px;">
+                        <i class="fa-solid fa-circle-info" style="color: #00e676;"></i>
+                        طريقة التثبيت
+                    </div>
+                    <p>${app.guide}</p>
+                </div>
+            `;
+
+            // التبديل بين الواجهات بنعومة
+            homeView.style.display = 'none';
+            detailView.style.display = 'block';
+            setTimeout(() => detailView.classList.add('active'), 10);
+            btnBack.style.display = 'block';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // العودة للواجهة الرئيسية
+        function showHome() {
+            const detailView = document.getElementById('detailView');
+            const homeView = document.getElementById('homeView');
+            const btnBack = document.getElementById('btnBack');
+
+            detailView.classList.remove('active');
+            setTimeout(() => {
+                detailView.style.display = 'none';
+                homeView.style.display = 'block';
+                btnBack.style.display = 'none';
+            }, 300);
+        }
+
+        // بدء التشغيل
+        renderHome();
+    </script>
+     <script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js");
+    });
+}
+</script>
+</body>
+</html>
